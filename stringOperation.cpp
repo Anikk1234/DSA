@@ -1,4 +1,4 @@
-Write the functions of all string operation (Length,Substring,Indexing,Concatenation,Insertion,Deleation,Replacement) without using any build in functions.
+//Write the functions of all string operation (Length,Substring,Indexing,Concatenation,Insertion,Deleation,Replacement) without using any build in functions.
 
 #include <bits/stdc++.h>
 using namespace std;
