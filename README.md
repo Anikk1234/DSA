@@ -2,5 +2,3 @@
 
 Data structure and Algorithm (DSA)
 
-## Explanations
-[English](./docs/en)
