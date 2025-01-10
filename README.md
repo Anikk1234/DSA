@@ -23,13 +23,13 @@ This repository aims to provide:
 
 ### Prerequisites
 - A basic understanding of programming concepts.
-- [C++], e.g., Python, Java, C++, etc.
+- [C++].
 
-### Setup
+### Setup<br>
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   🤝 Contributing
+   git clone https://github.com/your-username/your-repo-name.git<br>
+🤝 Contributing
 Contributions are welcome! To contribute:
 
 Fork the repository.
