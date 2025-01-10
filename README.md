@@ -25,7 +25,7 @@ This repository aims to provide:
 - A basic understanding of programming concepts.
 - [C++].
 
-### Setup<br>
+### Setup
 1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/your-repo-name.git<br>
@@ -51,12 +51,4 @@ This repository is licensed under the MIT License.
 
 🌟 Star the Repo!
 If you find this repository helpful, please consider giving it a ⭐ to support the project and help others discover it!
-
-yaml
-Copy code
-
---- 
-
-Feel free to customize this template based on your specific DSA implementations and goals!
-
 
