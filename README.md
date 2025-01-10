@@ -1,4 +1,3 @@
-###DSA
 <body>
     <header>
         <h1>Data Structures and Algorithms (DSA)</h1>
@@ -23,12 +22,12 @@
         </ul>
 
         <h2 id="features">Features</h2>
-        <ul>
-            <li>📂 Organized by categories like arrays, linked lists, trees, graphs, sorting, searching, and more.</li>
-            <li>📝 Well-documented code with explanations for each algorithm.</li>
-            <li>🚀 Examples for better understanding of concepts.</li>
-            <li>🧪 Unit tests for ensuring correctness (if applicable).</li>
-        </ul>
+        
+            📂 Organized by categories like arrays, linked lists, trees, graphs, sorting, searching, and more.<br>
+            📝 Well-documented code with explanations for each algorithm.<br>
+            🚀 Examples for better understanding of concepts.<br>
+            🧪 Unit tests for ensuring correctness (if applicable).<br>
+        
 
         <h2 id="setup">Getting Started</h2>
         <h3>Prerequisites</h3>
