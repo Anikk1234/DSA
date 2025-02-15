@@ -1,63 +1,76 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <climits>
+
 using namespace std;
 
-class SegmentTree {
-    vector<int> tree;
-    int n;
+class SqrtDecomposition {
+    vector<int> arr, block;
+    int blockSize, n;
 
 public:
-    // Build the segment tree
-    SegmentTree(const vector<int>& arr) {
-        n = arr.size();
-        tree.resize(4 * n, INT_MAX); // Allocate enough space
-        build(arr, 0, 0, n - 1);
+    // Constructor: Initialize data structures
+    SqrtDecomposition(vector<int>& input) {
+        n = input.size();
+        blockSize = sqrt(n);
+        arr = input;
+        block.assign((n + blockSize - 1) / blockSize, INT_MAX);
+
+        // Precompute block minimums
+        for (int i = 0; i < n; i++)
+            block[i / blockSize] = min(block[i / blockSize], arr[i]);
     }
 
-    // Recursive function to build the tree
-    void build(const vector<int>& arr, int node, int start, int end) {
-        if (start == end) {
-            tree[node] = arr[start]; // Leaf node
-        } else {
-            int mid = (start + end) / 2;
-            build(arr, 2 * node + 1, start, mid);
-            build(arr, 2 * node + 2, mid + 1, end);
-            tree[node] = min(tree[2 * node + 1], tree[2 * node + 2]); // Store min value
-        }
-    }
-
-    // Query the minimum in range [L, R]
+    // Range Minimum Query
     int query(int L, int R) {
-        return queryHelper(0, 0, n - 1, L, R);
+        int minVal = INT_MAX;
+
+        while (L <= R) {
+            // If L is at the beginning of a block and the entire block fits in [L, R]
+            if (L % blockSize == 0 && L + blockSize - 1 <= R) {
+                minVal = min(minVal, block[L / blockSize]);
+                L += blockSize;  // Skip the whole block
+            } else {
+                minVal = min(minVal, arr[L]);
+                L++;  // Move one element at a time
+            }
+        }
+        return minVal;
     }
 
-    // Recursive helper function for querying
-    int queryHelper(int node, int start, int end, int L, int R) {
-        if (R < start || L > end) return INT_MAX; // No overlap
-        if (L <= start && end <= R) return tree[node]; // Complete overlap
-
-        int mid = (start + end) / 2;
-        int leftMin = queryHelper(2 * node + 1, start, mid, L, R);
-        int rightMin = queryHelper(2 * node + 2, mid + 1, end, L, R);
-        return min(leftMin, rightMin);
+    // Update an element
+    void update(int index, int value) {
+        int blockIndex = index / blockSize;
+        arr[index] = value;
+        
+        // Recompute block minimum
+        int start = blockIndex * blockSize;
+        int end = min(start + blockSize, n);
+        block[blockIndex] = INT_MAX;
+        for (int i = start; i < end; i++)
+            block[blockIndex] = min(block[blockIndex], arr[i]);
     }
 };
 
 int main() {
-    int N;
-    cin >> N;
-    vector<int> arr(N);
+    int n, q;
+    cin >> n;
+    vector<int> arr(n);
 
-    for (int i = 0; i < N; i++) cin >> arr[i];
+    for (int i = 0; i < n; i++) cin >> arr[i];
 
-    SegmentTree st(arr);
+    SqrtDecomposition sqrtDecomp(arr);
 
-    int Q;
-    cin >> Q;
-
-    while (Q--) {
-        int i, j;
-        cin >> i >> j;
-        cout << st.query(i, j) << endl;
+    cin >> q;
+    while (q--) {
+        int type, a, b;
+        cin >> type >> a >> b;
+        if (type == 1) {  // Query for minimum in range [a, b]
+            cout << sqrtDecomp.query(a, b) << endl;
+        } else if (type == 2) {  // Update index a with value b
+            sqrtDecomp.update(a, b);
+        }
     }
 
     return 0;
