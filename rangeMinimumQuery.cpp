@@ -1,8 +1,4 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <climits>
-
+#include <bits/stdc++.h>
 using namespace std;
 
 class SqrtDecomposition {
