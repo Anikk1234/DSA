@@ -1,0 +1,1410 @@
+# Graph Algorithm Solutions Collection
+# Compiled on: 2025-05-25
+# Author: emon4075
+
+This file contains C++ solutions to various graph algorithm problems from competitive programming sites like Codeforces, LeetCode, and UVA.
+
+## 1. King Escape (Codeforces 1033A)
+# Problem: Determine if a king can reach a target position while avoiding a queen's attack lines
+# Description: A king needs to move from one position to another on a chessboard without crossing any lines attacked by a queen.
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    
+    int ax, ay, bx, by, cx, cy;
+    cin >> ax >> ay;  // Queen's position
+    cin >> bx >> by;  // King's position
+    cin >> cx >> cy;  // Target position
+    
+    // Check if king and target are in the same quadrant relative to the queen
+    bool possible = ((bx > ax && cx > ax) || (bx < ax && cx < ax)) &&
+                    ((by > ay && cy > ay) || (by < ay && cy < ay));
+    
+    cout << (possible ? "YES" : "NO") << endl;
+    
+    return 0;
+}
+
+## 2. A. Computer Game (Codeforces 1598A)
+# Problem: Finding if there's a path from left to right of a 2-row grid avoiding obstacles
+# Description: Determine if it's possible to move from the leftmost cell of a 2-row grid to the rightmost cell without stepping on obstacles.
+
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void solve() {
+    int n;
+    cin >> n;
+    
+    string row1, row2;
+    cin >> row1 >> row2;
+    
+    bool possible = true;
+    for (int i = 0; i < n; i++) {
+        if (row1[i] == '1' && row2[i] == '1') {
+            possible = false;
+            break;
+        }
+    }
+    
+    cout << (possible ? "YES" : "NO") << endl;
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        solve();
+    }
+    
+    return 0;
+}
+
+## 3. New Year Transportation (Codeforces 500A)
+# Problem: Following a fixed path in a graph to check if a specific cell can be reached
+# Description: Determine if it's possible to reach a specific cell by following a fixed sequence of jumps.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    int n, t;
+    cin >> n >> t;
+    
+    vector<int> portals(n);
+    for (int i = 1; i < n; i++) {
+        cin >> portals[i];
+    }
+    
+    int current = 1;
+    while (current < t) {
+        current += portals[current];
+    }
+    
+    cout << (current == t ? "YES" : "NO") << endl;
+    
+    return 0;
+}
+
+## 4. B. DZY Loves Chemistry (Codeforces 445B)
+# Problem: Finding the maximum possible product based on a graph structure
+# Description: Calculate the maximum product possible based on a given undirected graph.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfs(int node, vector<vector<int>>& graph, vector<bool>& visited) {
+    visited[node] = true;
+    for (int neighbor : graph[node]) {
+        if (!visited[neighbor]) {
+            dfs(neighbor, graph, visited);
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<vector<int>> graph(n + 1);
+    for (int i = 0; i < m; i++) {
+        int x, y;
+        cin >> x >> y;
+        graph[x].push_back(y);
+        graph[y].push_back(x);
+    }
+    
+    vector<bool> visited(n + 1, false);
+    int components = 0;
+    
+    for (int i = 1; i <= n; i++) {
+        if (!visited[i]) {
+            dfs(i, graph, visited);
+            components++;
+        }
+    }
+    
+    // The maximum value will be 2^(n-components)
+    long long result = 1;
+    for (int i = 0; i < n - components; i++) {
+        result *= 2;
+    }
+    
+    cout << result << endl;
+    
+    return 0;
+}
+
+## 5. Forever Winter (Codeforces 1829F)
+# Problem: Identifying a specific tree structure
+# Description: Find parameters in a tree structure that follows a specific pattern.
+
+#include <iostream>
+#include <vector>
+#include <map>
+#include <algorithm>
+using namespace std;
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<int> degree(n + 1, 0);
+    
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        degree[u]++;
+        degree[v]++;
+    }
+    
+    map<int, int> freq;
+    for (int i = 1; i <= n; i++) {
+        if (degree[i] > 0) {
+            freq[degree[i]]++;
+        }
+    }
+    
+    int x = 0, y = 0;
+    
+    // Find y (degree of central vertices)
+    for (auto& [deg, count] : freq) {
+        if (count == 1) {
+            y = deg;
+        }
+    }
+    
+    // Find x (number of leaves connected to each branch vertex)
+    for (auto& [deg, count] : freq) {
+        if (deg == 1) {
+            x = count / y;
+            break;
+        }
+    }
+    
+    cout << x << " " << y << endl;
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        solve();
+    }
+    
+    return 0;
+}
+
+## 6. Rumor (Codeforces 893C)
+# Problem: Finding the minimum cost to spread a rumor in connected components
+# Description: Calculate the minimum cost to spread a rumor to all connected people.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void dfs(int node, vector<vector<int>>& graph, vector<bool>& visited, vector<long long>& cost, long long& min_cost) {
+    visited[node] = true;
+    min_cost = min(min_cost, cost[node]);
+    
+    for (int neighbor : graph[node]) {
+        if (!visited[neighbor]) {
+            dfs(neighbor, graph, visited, cost, min_cost);
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<long long> cost(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> cost[i];
+    }
+    
+    vector<vector<int>> graph(n + 1);
+    for (int i = 0; i < m; i++) {
+        int x, y;
+        cin >> x >> y;
+        graph[x].push_back(y);
+        graph[y].push_back(x);
+    }
+    
+    vector<bool> visited(n + 1, false);
+    long long total_cost = 0;
+    
+    for (int i = 1; i <= n; i++) {
+        if (!visited[i]) {
+            long long min_cost = cost[i];
+            dfs(i, graph, visited, cost, min_cost);
+            total_cost += min_cost;
+        }
+    }
+    
+    cout << total_cost << endl;
+    
+    return 0;
+}
+
+## 7. Kefa and Park (Codeforces 580C)
+# Problem: Counting paths in a tree where the number of consecutive cats doesn't exceed a given value
+# Description: Count the number of leaf nodes that can be reached from the root without encountering more than m consecutive cats.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfs(int node, int parent, vector<vector<int>>& tree, vector<int>& cats, 
+         int consecutive_cats, int max_cats, int& count) {
+    
+    // Update consecutive cats
+    if (cats[node] == 1) {
+        consecutive_cats++;
+    } else {
+        consecutive_cats = 0; // Reset consecutive count
+    }
+    
+    // Too many consecutive cats
+    if (consecutive_cats > max_cats) {
+        return;
+    }
+    
+    // Check if it's a leaf node (other than parent)
+    bool is_leaf = true;
+    for (int neighbor : tree[node]) {
+        if (neighbor != parent) {
+            is_leaf = false;
+            dfs(neighbor, node, tree, cats, consecutive_cats, max_cats, count);
+        }
+    }
+    
+    // If it's a leaf, increment the count
+    if (is_leaf && node != 1) { // Not the root
+        count++;
+    }
+}
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<int> cats(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> cats[i];
+    }
+    
+    vector<vector<int>> tree(n + 1);
+    for (int i = 0; i < n - 1; i++) {
+        int x, y;
+        cin >> x >> y;
+        tree[x].push_back(y);
+        tree[y].push_back(x);
+    }
+    
+    int count = 0;
+    dfs(1, -1, tree, cats, 0, m, count);
+    
+    cout << count << endl;
+    
+    return 0;
+}
+
+## 8. Related to Connected Component (Codeforces 1829E)
+# Problem: Finding the largest connected component in a grid
+# Description: Identify the largest connected component of cells with water in a grid.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int dfs(vector<vector<int>>& grid, int i, int j, vector<vector<bool>>& visited) {
+    int n = grid.size();
+    int m = grid[0].size();
+    
+    if (i < 0 || i >= n || j < 0 || j >= m || visited[i][j] || grid[i][j] == 0) {
+        return 0;
+    }
+    
+    visited[i][j] = true;
+    int size = grid[i][j];
+    
+    // Visit all 4 neighbors
+    size += dfs(grid, i+1, j, visited);
+    size += dfs(grid, i-1, j, visited);
+    size += dfs(grid, i, j+1, visited);
+    size += dfs(grid, i, j-1, visited);
+    
+    return size;
+}
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<vector<int>> grid(n, vector<int>(m));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> grid[i][j];
+        }
+    }
+    
+    vector<vector<bool>> visited(n, vector<bool>(m, false));
+    int max_size = 0;
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (!visited[i][j] && grid[i][j] > 0) {
+                int size = dfs(grid, i, j, visited);
+                max_size = max(max_size, size);
+            }
+        }
+    }
+    
+    cout << max_size << endl;
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        solve();
+    }
+    
+    return 0;
+}
+
+## 9. Find if Path Exists in Graph (LeetCode)
+# Problem: Checking if there's a path between two nodes in an undirected graph
+# Description: Determine if it's possible to reach from a source node to a destination node in an undirected graph.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class Solution {
+public:
+    bool validPath(int n, vector<vector<int>>& edges, int source, int destination) {
+        if (source == destination) return true;
+        
+        // Build the adjacency list
+        vector<vector<int>> adj(n);
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        // BFS to find path
+        vector<bool> visited(n, false);
+        queue<int> q;
+        
+        q.push(source);
+        visited[source] = true;
+        
+        while (!q.empty()) {
+            int curr = q.front();
+            q.pop();
+            
+            if (curr == destination) return true;
+            
+            for (int neighbor : adj[curr]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        
+        return false;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> edges = {{0,1},{1,2},{2,0}};
+    cout << (sol.validPath(3, edges, 0, 2) ? "true" : "false") << endl;
+    return 0;
+}
+
+## 10. Number of Provinces (LeetCode 547)
+# Problem: Finding the number of connected components in an undirected graph
+# Description: Count the number of connected components in a graph where each component represents a province.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    void dfs(vector<vector<int>>& isConnected, vector<bool>& visited, int city) {
+        visited[city] = true;
+        for (int neighbor = 0; neighbor < isConnected.size(); neighbor++) {
+            if (isConnected[city][neighbor] == 1 && !visited[neighbor]) {
+                dfs(isConnected, visited, neighbor);
+            }
+        }
+    }
+    
+    int findCircleNum(vector<vector<int>>& isConnected) {
+        int n = isConnected.size();
+        vector<bool> visited(n, false);
+        int provinces = 0;
+        
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                dfs(isConnected, visited, i);
+                provinces++;
+            }
+        }
+        
+        return provinces;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> isConnected = {{1,1,0},{1,1,0},{0,0,1}};
+    cout << sol.findCircleNum(isConnected) << endl;  // Output: 2
+    return 0;
+}
+
+## 11. Network Delay Time (LeetCode)
+# Problem: Finding the time for all nodes to receive a signal
+# Description: Calculate the time it takes for all nodes to receive a signal sent from a given node.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class Solution {
+public:
+    int networkDelayTime(vector<vector<int>>& times, int n, int k) {
+        // Build adjacency list
+        vector<vector<pair<int, int>>> graph(n + 1);
+        for (const auto& edge : times) {
+            int u = edge[0], v = edge[1], w = edge[2];
+            graph[u].push_back({v, w});
+        }
+        
+        // Dijkstra's algorithm
+        vector<int> dist(n + 1, INT_MAX);
+        dist[k] = 0;
+        
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        pq.push({0, k});
+        
+        while (!pq.empty()) {
+            int d = pq.top().first;
+            int node = pq.top().second;
+            pq.pop();
+            
+            if (d > dist[node]) continue;
+            
+            for (auto& neighbor : graph[node]) {
+                int next = neighbor.first;
+                int weight = neighbor.second;
+                
+                if (dist[next] > dist[node] + weight) {
+                    dist[next] = dist[node] + weight;
+                    pq.push({dist[next], next});
+                }
+            }
+        }
+        
+        int max_time = 0;
+        for (int i = 1; i <= n; i++) {
+            if (dist[i] == INT_MAX) return -1; // Some node is unreachable
+            max_time = max(max_time, dist[i]);
+        }
+        
+        return max_time;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> times = {{2,1,1},{2,3,1},{3,4,1}};
+    cout << sol.networkDelayTime(times, 4, 2) << endl;  // Output: 2
+    return 0;
+}
+
+## 12. Count the Number of Complete Components (LeetCode 2685)
+# Problem: Counting connected components that are complete graphs
+# Description: Count the number of connected components in an undirected graph where each component forms a complete graph.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    void dfs(int node, vector<vector<int>>& graph, vector<bool>& visited, vector<int>& component) {
+        visited[node] = true;
+        component.push_back(node);
+        
+        for (int neighbor : graph[node]) {
+            if (!visited[neighbor]) {
+                dfs(neighbor, graph, visited, component);
+            }
+        }
+    }
+    
+    bool isComplete(vector<vector<int>>& graph, vector<int>& component) {
+        int n = component.size();
+        
+        // Check if each node connects to every other node
+        for (int node : component) {
+            if (graph[node].size() != n - 1) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    int countCompleteComponents(int n, vector<vector<int>>& edges) {
+        vector<vector<int>> graph(n);
+        for (const auto& edge : edges) {
+            graph[edge[0]].push_back(edge[1]);
+            graph[edge[1]].push_back(edge[0]);
+        }
+        
+        vector<bool> visited(n, false);
+        int count = 0;
+        
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                vector<int> component;
+                dfs(i, graph, visited, component);
+                
+                if (isComplete(graph, component)) {
+                    count++;
+                }
+            }
+        }
+        
+        return count;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> edges = {{0,1},{0,2},{1,2},{3,4}};
+    cout << sol.countCompleteComponents(5, edges) << endl;  // Output: 2
+    return 0;
+}
+
+## 13. Keys and Rooms (LeetCode 841)
+# Problem: Checking if all rooms can be visited starting from room 0
+# Description: Determine if all rooms can be visited using the keys found in each room.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class Solution {
+public:
+    bool canVisitAllRooms(vector<vector<int>>& rooms) {
+        int n = rooms.size();
+        vector<bool> visited(n, false);
+        queue<int> q;
+        
+        // Start from room 0
+        q.push(0);
+        visited[0] = true;
+        
+        while (!q.empty()) {
+            int room = q.front();
+            q.pop();
+            
+            // Visit all rooms that can be accessed using keys from the current room
+            for (int key : rooms[room]) {
+                if (!visited[key]) {
+                    visited[key] = true;
+                    q.push(key);
+                }
+            }
+        }
+        
+        // Check if all rooms were visited
+        for (bool v : visited) {
+            if (!v) return false;
+        }
+        
+        return true;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> rooms = {{1},{2},{3},{}};
+    cout << (sol.canVisitAllRooms(rooms) ? "true" : "false") << endl;  // Output: true
+    return 0;
+}
+
+## 14. Find the Town Judge (LeetCode 997)
+# Problem: Finding a node that is trusted by all other nodes but trusts nobody
+# Description: Identify the person who is trusted by everyone else but doesn't trust anyone.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    int findJudge(int n, vector<vector<int>>& trust) {
+        vector<int> trustCount(n + 1, 0);
+        
+        for (auto& relation : trust) {
+            trustCount[relation[0]]--; // Person who trusts others
+            trustCount[relation[1]]++; // Person who is trusted
+        }
+        
+        for (int i = 1; i <= n; i++) {
+            if (trustCount[i] == n - 1) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> trust = {{1,3},{2,3}};
+    cout << sol.findJudge(3, trust) << endl;  // Output: 3
+    return 0;
+}
+
+## 15. Number of Islands (LeetCode 200)
+# Problem: Counting distinct islands in a grid
+# Description: Count the number of disconnected islands in a 2D grid.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    void dfs(vector<vector<char>>& grid, int i, int j) {
+        int m = grid.size();
+        int n = grid[0].size();
+        
+        if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] == '0') {
+            return;
+        }
+        
+        // Mark as visited
+        grid[i][j] = '0';
+        
+        // Visit all neighbors
+        dfs(grid, i+1, j);
+        dfs(grid, i-1, j);
+        dfs(grid, i, j+1);
+        dfs(grid, i, j-1);
+    }
+    
+    int numIslands(vector<vector<char>>& grid) {
+        if (grid.empty() || grid[0].empty()) {
+            return 0;
+        }
+        
+        int m = grid.size();
+        int n = grid[0].size();
+        int count = 0;
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        
+        return count;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<char>> grid = {
+        {'1', '1', '0', '0', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '1', '0', '0'},
+        {'0', '0', '0', '1', '1'}
+    };
+    cout << sol.numIslands(grid) << endl;  // Output: 3
+    return 0;
+}
+
+## 16. Course Schedule (LeetCode 207)
+# Problem: Checking if it's possible to finish all courses by detecting cycles in a directed graph
+# Description: Determine if it's possible to finish all courses given their prerequisites.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    bool dfs(int node, vector<vector<int>>& graph, vector<int>& visited) {
+        // 0: not visited, 1: visiting, 2: visited
+        if (visited[node] == 1) return false; // Cycle detected
+        if (visited[node] == 2) return true;  // Already processed
+        
+        visited[node] = 1; // Mark as visiting
+        
+        for (int neighbor : graph[node]) {
+            if (!dfs(neighbor, graph, visited)) {
+                return false;
+            }
+        }
+        
+        visited[node] = 2; // Mark as visited
+        return true;
+    }
+    
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<vector<int>> graph(numCourses);
+        for (const auto& prereq : prerequisites) {
+            graph[prereq[0]].push_back(prereq[1]);
+        }
+        
+        vector<int> visited(numCourses, 0);
+        
+        for (int i = 0; i < numCourses; i++) {
+            if (visited[i] == 0) {
+                if (!dfs(i, graph, visited)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+};
+
+// Example usage
+int main() {
+    Solution sol;
+    vector<vector<int>> prerequisites = {{1,0},{0,1}};
+    cout << (sol.canFinish(2, prerequisites) ? "true" : "false") << endl;  // Output: false
+    return 0;
+}
+
+
+## 17. KuPellaKeS (UVA 1909)
+# Problem: Finding shortest path in a graph with special movement rules
+# Description: Find the shortest path in a graph where movement follows specific rules based on the current state.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <climits>
+using namespace std;
+
+// Direction arrays
+int dr[] = {-1, 0, 1, 0}; // Up, Right, Down, Left
+int dc[] = {0, 1, 0, -1};
+
+struct State {
+    int r, c, dir, moves;
+    
+    bool operator==(const State& other) const {
+        return r == other.r && c == other.c && dir == other.dir;
+    }
+};
+
+struct StateHash {
+    size_t operator()(const State& state) const {
+        return (state.r * 10000) + (state.c * 100) + state.dir;
+    }
+};
+
+int main() {
+    int n, m;
+    while (cin >> n >> m && n && m) {
+        vector<vector<char>> grid(n, vector<char>(m));
+        
+        // Read the grid
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                cin >> grid[i][j];
+            }
+        }
+        
+        // Find start and end positions
+        int sr = -1, sc = -1, er = -1, ec = -1;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (grid[i][j] == 'S') {
+                    sr = i;
+                    sc = j;
+                } else if (grid[i][j] == 'T') {
+                    er = i;
+                    ec = j;
+                }
+            }
+        }
+        
+        // BFS to find the shortest path
+        unordered_map<State, int, StateHash> dist;
+        queue<State> q;
+        
+        // Try all 4 starting directions
+        for (int d = 0; d < 4; d++) {
+            State start = {sr, sc, d, 0};
+            q.push(start);
+            dist[start] = 0;
+        }
+        
+        int minMoves = INT_MAX;
+        
+        while (!q.empty()) {
+            State curr = q.front();
+            q.pop();
+            
+            // If reached target
+            if (grid[curr.r][curr.c] == 'T') {
+                minMoves = min(minMoves, curr.moves);
+                continue;
+            }
+            
+            // Try all possible next moves
+            for (int turn = -1; turn <= 1; turn++) {  // -1: turn left, 0: straight, 1: turn right
+                int newDir = (curr.dir + turn + 4) % 4;
+                int nr = curr.r + dr[newDir];
+                int nc = curr.c + dc[newDir];
+                
+                // Check if valid move
+                if (nr >= 0 && nr < n && nc >= 0 && nc < m && grid[nr][nc] != '#') {
+                    State next = {nr, nc, newDir, curr.moves + 1};
+                    
+                    // If this state hasn't been visited or we found a shorter path
+                    if (dist.find(next) == dist.end() || dist[next] > curr.moves + 1) {
+                        dist[next] = curr.moves + 1;
+                        q.push(next);
+                    }
+                }
+            }
+        }
+        
+        if (minMoves != INT_MAX) {
+            cout << minMoves << endl;
+        } else {
+            cout << -1 << endl;
+        }
+    }
+    
+    return 0;
+}
+
+
+## 18. Graph Connectivity (UVA 459)
+# Problem: Finding connected components in an undirected graph
+# Description: Count the number of connected components in an undirected graph.
+
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class DisjointSet {
+private:
+    vector<int> parent, rank;
+    
+public:
+    DisjointSet(int n) {
+        parent.resize(n);
+        rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+    
+    void unionSets(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return;
+        
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+    }
+    
+    int countComponents(int n) {
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            if (parent[i] == i) {
+                count++;
+            }
+        }
+        return count;
+    }
+};
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        char maxNode;
+        cin >> maxNode;
+        cin.ignore(); // Consume newline
+        
+        int n = maxNode - 'A' + 1;
+        DisjointSet ds(n);
+        
+        string line;
+        while (getline(cin, line) && !line.empty()) {
+            int u = line[0] - 'A';
+            int v = line[1] - 'A';
+            ds.unionSets(u, v);
+        }
+        
+        cout << ds.countComponents(n) << endl;
+        
+        if (t > 0) cout << endl;
+    }
+    
+    return 0;
+}
+
+## 19. Oil Deposits (UVA 572)
+# Problem: Counting connected components in a 2D grid
+# Description: Count the number of connected oil deposits in a 2D grid.
+
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void dfs(vector<vector<char>>& grid, int i, int j, int m, int n) {
+    if (i < 0 || i >= m || j < 0 || j >= n || grid[i][j] != '@') {
+        return;
+    }
+    
+    grid[i][j] = '*'; // Mark as visited
+    
+    // Visit all 8 neighbors (including diagonals)
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0) continue;
+            dfs(grid, i + dx, j + dy, m, n);
+        }
+    }
+}
+
+int main() {
+    int m, n;
+    while (cin >> m >> n && m != 0) {
+        vector<vector<char>> grid(m, vector<char>(n));
+        
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                cin >> grid[i][j];
+            }
+        }
+        
+        int deposits = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '@') {
+                    deposits++;
+                    dfs(grid, i, j, m, n);
+                }
+            }
+        }
+        
+        cout << deposits << endl;
+    }
+    
+    return 0;
+}
+
+## 20. Wormholes (UVA 558)
+# Problem: Detecting negative cycles in a directed graph
+# Description: Determine if there's a negative cycle in a directed graph.
+
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge {
+    int from, to, weight;
+};
+
+bool hasNegativeCycle(int n, vector<Edge>& edges) {
+    vector<int> dist(n, 0);
+    
+    // Bellman-Ford algorithm
+    for (int i = 0; i < n - 1; i++) {
+        for (const Edge& edge : edges) {
+            if (dist[edge.to] > dist[edge.from] + edge.weight) {
+                dist[edge.to] = dist[edge.from] + edge.weight;
+            }
+        }
+    }
+    
+    // Check for negative cycles
+    for (const Edge& edge : edges) {
+        if (dist[edge.to] > dist[edge.from] + edge.weight) {
+            return true; // Negative cycle exists
+        }
+    }
+    
+    return false;
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        int n, m;
+        cin >> n >> m;
+        
+        vector<Edge> edges(m);
+        for (int i = 0; i < m; i++) {
+            cin >> edges[i].from >> edges[i].to >> edges[i].weight;
+        }
+        
+        if (hasNegativeCycle(n, edges)) {
+            cout << "possible" << endl;
+        } else {
+            cout << "not possible" << endl;
+        }
+    }
+    
+    return 0;
+}
+
+## 21. Heavy Cargo (UVA 544)
+# Problem: Finding the maximum capacity path in a graph
+# Description: Find the maximum weight path between two cities in a road network.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <string>
+#include <climits>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    int n, r, scenario = 1;
+    
+    while (cin >> n >> r && (n != 0 || r != 0)) {
+        unordered_map<string, int> cityIndex;
+        vector<string> cityName;
+        int cityCount = 0;
+        
+        vector<vector<int>> capacity(n, vector<int>(n, 0));
+        
+        for (int i = 0; i < r; i++) {
+            string c1, c2;
+            int cap;
+            cin >> c1 >> c2 >> cap;
+            
+            if (cityIndex.find(c1) == cityIndex.end()) {
+                cityIndex[c1] = cityCount++;
+                cityName.push_back(c1);
+            }
+            
+            if (cityIndex.find(c2) == cityIndex.end()) {
+                cityIndex[c2] = cityCount++;
+                cityName.push_back(c2);
+            }
+            
+            int idx1 = cityIndex[c1];
+            int idx2 = cityIndex[c2];
+            
+            capacity[idx1][idx2] = capacity[idx2][idx1] = max(capacity[idx1][idx2], cap);
+        }
+        
+        string start, end;
+        cin >> start >> end;
+        int s = cityIndex[start];
+        int e = cityIndex[end];
+        
+        // Dijkstra's algorithm for maximum capacity path
+        vector<int> maxCapacity(n, 0);
+        vector<bool> visited(n, false);
+        maxCapacity[s] = INT_MAX;
+        
+        priority_queue<pair<int, int>> pq;
+        pq.push({INT_MAX, s});
+        
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+            
+            if (visited[u]) continue;
+            visited[u] = true;
+            
+            if (u == e) break;
+            
+            for (int v = 0; v < n; v++) {
+                if (capacity[u][v] > 0) {
+                    int newCap = min(maxCapacity[u], capacity[u][v]);
+                    if (newCap > maxCapacity[v]) {
+                        maxCapacity[v] = newCap;
+                        pq.push({newCap, v});
+                    }
+                }
+            }
+        }
+        
+        cout << "Scenario #" << scenario++ << endl;
+        cout << maxCapacity[e] << " tons" << endl << endl;
+    }
+    
+    return 0;
+}
+
+## 22. Dominos 2 (UVA 11518)
+# Problem: Counting the total number of dominos that fall
+# Description: Count the number of dominos that will fall when knocking down some initial dominos.
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfs(int node, vector<vector<int>>& graph, vector<bool>& visited) {
+    visited[node] = true;
+    
+    for (int neighbor : graph[node]) {
+        if (!visited[neighbor]) {
+            dfs(neighbor, graph, visited);
+        }
+    }
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        int n, m, l;
+        cin >> n >> m >> l;
+        
+        vector<vector<int>> graph(n + 1);
+        for (int i = 0; i < m; i++) {
+            int x, y;
+            cin >> x >> y;
+            graph[x].push_back(y);
+        }
+        
+        vector<bool> visited(n + 1, false);
+        
+        for (int i = 0; i < l; i++) {
+            int z;
+            cin >> z;
+            if (!visited[z]) {
+                dfs(z, graph, visited);
+            }
+        }
+        
+        int fallen = 0;
+        for (int i = 1; i <= n; i++) {
+            if (visited[i]) {
+                fallen++;
+            }
+        }
+        
+        cout << fallen << endl;
+    }
+    
+    return 0;
+}
+
+## 23. Bicoloring (UVA 10004)
+# Problem: Checking if a graph can be colored with two colors such that no adjacent nodes have the same color
+# Description: Determine if a graph is bipartite.
+
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+bool isBipartite(vector<vector<int>>& graph, int n) {
+    vector<int> color(n, -1);
+    queue<int> q;
+    
+    for (int start = 0; start < n; start++) {
+        if (color[start] != -1) continue; // Already processed
+        
+        color[start] = 0;
+        q.push(start);
+        
+        while (!q.empty()) {
+            int node = q.front();
+            q.pop();
+            
+            for (int neighbor : graph[node]) {
+                if (color[neighbor] == -1) {
+                    color[neighbor] = 1 - color[node]; // Alternate color
+                    q.push(neighbor);
+                } else if (color[neighbor] == color[node]) {
+                    return false; // Same color for adjacent nodes
+                }
+            }
+        }
+    }
+    
+    return true;
+}
+
+int main() {
+    int n;
+    while (cin >> n && n != 0) {
+        int m;
+        cin >> m;
+        
+        vector<vector<int>> graph(n);
+        for (int i = 0; i < m; i++) {
+            int u, v;
+            cin >> u >> v;
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+        
+        if (isBipartite(graph, n)) {
+            cout << "BICOLORABLE." << endl;
+        } else {
+            cout << "NOT BICOLORABLE." << endl;
+        }
+    }
+    
+    return 0;
+}
+
+## 24. Dark Roads (UVA 11631)
+# Problem: Finding a minimum spanning tree (MST) to save maximum energy
+# Description: Calculate the maximum amount of energy that can be saved by disconnecting some roads.
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Edge {
+    int from, to, weight;
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> parent, rank;
+    
+public:
+    DisjointSet(int n) {
+        parent.resize(n);
+        rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+    
+    bool unionSets(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return false;
+        
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+        
+        return true;
+    }
+};
+
+int main() {
+    int m, n;
+    while (cin >> m >> n && (m != 0 || n != 0)) {
+        vector<Edge> edges(n);
+        int totalCost = 0;
+        
+        for (int i = 0; i < n; i++) {
+            cin >> edges[i].from >> edges[i].to >> edges[i].weight;
+            totalCost += edges[i].weight;
+        }
+        
+        // Sort edges by weight for Kruskal's algorithm
+        sort(edges.begin(), edges.end());
+        
+        DisjointSet ds(m);
+        int mstCost = 0;
+        int edgesAdded = 0;
+        
+        for (const Edge& edge : edges) {
+            if (ds.unionSets(edge.from, edge.to)) {
+                mstCost += edge.weight;
+                edgesAdded++;
+                if (edgesAdded == m - 1) break; // MST is complete
+            }
+        }
+        
+        cout << totalCost - mstCost << endl;
+    }
+    
+    return 0;
+}

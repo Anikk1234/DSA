@@ -1,0 +1,2045 @@
+# Tree Algorithm Solutions Collection
+# Compiled on: 2025-05-25
+# Author: emon4075
+
+This file contains C++ solutions to various tree algorithm problems from competitive programming sites like Codeforces, LeetCode, and UVA.
+
+## 1. Omkar and Heavenly Tree (Codeforces 1583B)
+# Problem: Create a tree where certain vertices are not direct ancestors of specific vertices
+# Description: Construct any valid tree such that for each constraint (a,b,c), vertex b is not on the path from a to c.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+void Solve() {
+    int n, m;
+    cin >> n >> m;
+    
+    vector<bool> MiddleNode(n + 1, false);
+    
+    for (int i = 0; i < m; i++) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        MiddleNode[b] = true;  // Mark b as a middle node in a constraint
+    }
+    
+    // Find a node that doesn't appear as a middle node in any constraint
+    int Center = 1;
+    for (int i = 1; i <= n; i++) {
+        if (!MiddleNode[i]) {
+            Center = i;
+            break;
+        }
+    }
+    
+    // Create a star tree with center as the root
+    for (int i = 1; i <= n; i++) {
+        if (i != Center) {
+            cout << Center << " " << i << endl;
+        }
+    }
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        Solve();
+    }
+    
+    return 0;
+}
+
+## 2. Yet Another Card Deck (Codeforces 1511C)
+# Problem: Track positions of cards with specific colors in a deck
+# Description: Simulate operations on a card deck, where querying a color brings the card to the front.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, q;
+    cin >> n >> q;
+    
+    vector<int> Deck(n);
+    unordered_map<int, int> FirstPos;
+    
+    for (int i = 0; i < n; i++) {
+        cin >> Deck[i];
+        if (FirstPos.find(Deck[i]) == FirstPos.end()) {
+            FirstPos[Deck[i]] = i + 1;  // 1-indexed position
+        }
+    }
+    
+    for (int i = 0; i < q; i++) {
+        int Color;
+        cin >> Color;
+        
+        int Position = FirstPos[Color];
+        cout << Position << " ";
+        
+        // Update positions for all colors that were before the current one
+        for (auto& Pair : FirstPos) {
+            if (Pair.second < Position) {
+                Pair.second++;
+            }
+        }
+        
+        // Move the current color to the front
+        FirstPos[Color] = 1;
+    }
+    
+    return 0;
+}
+
+## 3. A. Party (Codeforces 115A)
+# Problem: Finding the maximum depth in an employee hierarchy
+# Description: Given the supervisor relationships, determine the minimum number of groups needed.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int DFS(int Node, const vector<vector<int>>& Subordinates) {
+    int MaxDepth = 0;
+    for (int Sub : Subordinates[Node]) {
+        MaxDepth = max(MaxDepth, DFS(Sub, Subordinates));
+    }
+    return MaxDepth + 1;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    
+    vector<int> Managers(n + 1);
+    vector<vector<int>> Subordinates(n + 1);
+    
+    for (int i = 1; i <= n; i++) {
+        cin >> Managers[i];
+        if (Managers[i] != -1) {
+            Subordinates[Managers[i]].push_back(i);
+        }
+    }
+    
+    int MaxDepth = 0;
+    for (int i = 1; i <= n; i++) {
+        if (Managers[i] == -1) {  // This is a root employee
+            MaxDepth = max(MaxDepth, DFS(i, Subordinates));
+        }
+    }
+    
+    cout << MaxDepth << endl;
+    
+    return 0;
+}
+
+## 4. Hierarchy (Codeforces Contest 17B)
+# Problem: Finding minimum cost to establish a hierarchy
+# Description: Given a set of employees and potential supervisor relationships with costs, find the minimum cost to establish a valid hierarchy.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    
+    vector<int> Qualification(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> Qualification[i];
+    }
+    
+    int m;
+    cin >> m;
+    
+    vector<vector<pair<int, int>>> Subordinates(n + 1);  // [boss] -> [(subordinate, cost)]
+    vector<bool> HasBoss(n + 1, false);
+    
+    for (int i = 0; i < m; i++) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        Subordinates[a].push_back({b, c});
+        HasBoss[b] = true;
+    }
+    
+    // Count employees without a boss (should be exactly 1 for a valid hierarchy)
+    int RootCount = 0;
+    for (int i = 1; i <= n; i++) {
+        if (!HasBoss[i]) {
+            RootCount++;
+        }
+    }
+    
+    if (RootCount != 1) {
+        cout << -1 << endl;
+        return 0;
+    }
+    
+    // Find minimum cost for each employee to have a boss
+    long long TotalCost = 0;
+    for (int i = 1; i <= n; i++) {
+        if (HasBoss[i]) {
+            int MinCost = INT_MAX;
+            for (int j = 1; j <= n; j++) {
+                for (auto& Sub : Subordinates[j]) {
+                    if (Sub.first == i) {
+                        MinCost = min(MinCost, Sub.second);
+                    }
+                }
+            }
+            if (MinCost == INT_MAX) {
+                cout << -1 << endl;
+                return 0;
+            }
+            TotalCost += MinCost;
+        }
+    }
+    
+    cout << TotalCost << endl;
+    
+    return 0;
+}
+
+## 5. Bmail Computer Network (Codeforces 1057A)
+# Problem: Finding the path from root to leaf in a tree
+# Description: Given a tree where each node except the root has one parent, find the path from node 1 to node n.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    
+    vector<int> Parent(n + 1);
+    Parent[1] = 1;  // Root is its own parent
+    
+    for (int i = 2; i <= n; i++) {
+        cin >> Parent[i];
+    }
+    
+    vector<int> Path;
+    int Current = n;
+    
+    while (Current != 1) {
+        Path.push_back(Current);
+        Current = Parent[Current];
+    }
+    
+    Path.push_back(1);  // Add the root
+    reverse(Path.begin(), Path.end());
+    
+    for (int Node : Path) {
+        cout << Node << " ";
+    }
+    
+    return 0;
+}
+
+## 6. Christmas Spruce (Codeforces 913B)
+# Problem: Checking if a tree is a spruce
+# Description: A vertex is a leaf if it has no children. A tree is a spruce if every non-leaf vertex has at least 3 leaf children.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    
+    vector<vector<int>> Children(n + 1);
+    
+    for (int i = 2; i <= n; i++) {
+        int Parent;
+        cin >> Parent;
+        Children[Parent].push_back(i);
+    }
+    
+    for (int i = 1; i <= n; i++) {
+        if (!Children[i].empty()) {  // Non-leaf vertex
+            int LeafCount = 0;
+            for (int Child : Children[i]) {
+                if (Children[Child].empty()) {  // Child is a leaf
+                    LeafCount++;
+                }
+            }
+            if (LeafCount < 3) {
+                cout << "No" << endl;
+                return 0;
+            }
+        }
+    }
+    
+    cout << "Yes" << endl;
+    
+    return 0;
+}
+
+## 7. Finding Diameter of a tree (Codeforces Gym 102694A)
+# Problem: Find the diameter (longest path) in an undirected tree
+# Description: Diameter of a tree is the length of the longest path between any two nodes in the tree.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+void DFS(int Node, vector<vector<pair<int, int>>>& Tree, vector<int>& Dist) {
+    for (auto& P : Tree[Node]) {
+        int Next = P.first;
+        int Weight = P.second;
+        
+        if (Dist[Next] == -1) {
+            Dist[Next] = Dist[Node] + Weight;
+            DFS(Next, Tree, Dist);
+        }
+    }
+}
+
+pair<int, int> FarthestNode(int Start, vector<vector<pair<int, int>>>& Tree, int n) {
+    vector<int> Dist(n + 1, -1);
+    Dist[Start] = 0;
+    
+    DFS(Start, Tree, Dist);
+    
+    int MaxDist = 0;
+    int Farthest = Start;
+    
+    for (int i = 1; i <= n; i++) {
+        if (Dist[i] > MaxDist) {
+            MaxDist = Dist[i];
+            Farthest = i;
+        }
+    }
+    
+    return {Farthest, MaxDist};
+}
+
+int main() {
+    int n;
+    cin >> n;
+    
+    vector<vector<pair<int, int>>> Tree(n + 1);
+    
+    for (int i = 1; i < n; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        Tree[u].push_back({v, w});
+        Tree[v].push_back({u, w});
+    }
+    
+    // Find the farthest node from any node (e.g., node 1)
+    auto P1 = FarthestNode(1, Tree, n);
+    
+    // Find the farthest node from P1.first
+    auto P2 = FarthestNode(P1.first, Tree, n);
+    
+    cout << P2.second << endl;
+    
+    return 0;
+}
+
+## 8. Reposts (Codeforces 522A)
+# Problem: Finding the maximum depth in a repost chain
+# Description: Given a chain of reposts, find the maximum chain length.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+string ToLower(string s) {
+    transform(s.begin(), s.end(), s.begin(), ::tolower);
+    return s;
+}
+
+int DFS(string Node, unordered_map<string, vector<string>>& Graph) {
+    int MaxDepth = 0;
+    for (const string& Child : Graph[Node]) {
+        MaxDepth = max(MaxDepth, DFS(Child, Graph));
+    }
+    return MaxDepth + 1;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    
+    unordered_map<string, vector<string>> Graph;
+    
+    for (int i = 0; i < n; i++) {
+        string Name1, Reposted, Name2;
+        cin >> Name1 >> Reposted >> Name2;
+        
+        Name1 = ToLower(Name1);
+        Name2 = ToLower(Name2);
+        
+        Graph[Name2].push_back(Name1);
+    }
+    
+    cout << DFS("polycarp", Graph) << endl;
+    
+    return 0;
+}
+
+## 9. Binary Tree Inorder Traversal (LeetCode)
+# Problem: Implement inorder traversal of a binary tree
+# Description: Given the root of a binary tree, return the inorder traversal of its nodes' values.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+void Insert(Node *&Root, int Value) {
+    Node *NewNode = new Node(Value);
+    if (Root == NULL) {
+        Root = NewNode;
+        return;
+    }
+
+    queue<Node *> Q;
+    Q.push(Root);
+
+    while (!Q.empty()) {
+        Node *Temp = Q.front();
+        Q.pop();
+
+        if (Temp->Left == NULL) {
+            Temp->Left = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Left);
+        }
+
+        if (Temp->Right == NULL) {
+            Temp->Right = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Right);
+        }
+    }
+}
+
+void InorderHelper(Node* Root, vector<int>& Result) {
+    if (Root == NULL) {
+        return;
+    }
+    
+    InorderHelper(Root->Left, Result);  // Process left subtree
+    Result.push_back(Root->Value);      // Process current node
+    InorderHelper(Root->Right, Result); // Process right subtree
+}
+
+vector<int> InorderTraversal(Node* Root) {
+    vector<int> Result;
+    InorderHelper(Root, Result);
+    return Result;
+}
+
+int main() {
+    // Create a simple binary tree
+    Node *Root = NULL;
+    Insert(Root, 1);
+    Insert(Root, 2);
+    Insert(Root, 3);
+    
+    vector<int> Result = InorderTraversal(Root);
+    
+    cout << "Inorder Traversal: ";
+    for (int Val : Result) {
+        cout << Val << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}
+
+## 10. Lowest Common Ancestor of a Binary Search Tree (LeetCode 235)
+# Problem: Find the lowest common ancestor of two nodes in a BST
+# Description: Given a BST and two node values, find the node that is the lowest common ancestor of the two nodes.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+// Insert into BST (not complete binary tree)
+void InsertBST(Node *&Root, int Value) {
+    if (Root == NULL) {
+        Root = new Node(Value);
+        return;
+    }
+    
+    if (Value < Root->Value) {
+        if (Root->Left == NULL)
+            Root->Left = new Node(Value);
+        else
+            InsertBST(Root->Left, Value);
+    } else {
+        if (Root->Right == NULL)
+            Root->Right = new Node(Value);
+        else
+            InsertBST(Root->Right, Value);
+    }
+}
+
+Node* LowestCommonAncestor(Node* Root, Node* p, Node* q) {
+    // Both p and q are smaller than root, LCA must be in left subtree
+    if (p->Value < Root->Value && q->Value < Root->Value) {
+        return LowestCommonAncestor(Root->Left, p, q);
+    }
+    
+    // Both p and q are greater than root, LCA must be in right subtree
+    if (p->Value > Root->Value && q->Value > Root->Value) {
+        return LowestCommonAncestor(Root->Right, p, q);
+    }
+    
+    // One node is smaller and one is greater, or one of them is equal to root
+    // In all these cases, root is the LCA
+    return Root;
+}
+
+int main() {
+    // Create a sample BST
+    Node *Root = NULL;
+    InsertBST(Root, 6);
+    InsertBST(Root, 2);
+    InsertBST(Root, 8);
+    InsertBST(Root, 0);
+    InsertBST(Root, 4);
+    InsertBST(Root, 7);
+    InsertBST(Root, 9);
+    InsertBST(Root, 3);
+    InsertBST(Root, 5);
+    
+    Node *p = new Node(2);
+    Node *q = new Node(4);
+    
+    Node *Lca = LowestCommonAncestor(Root, p, q);
+    cout << "LCA value: " << Lca->Value << endl;
+    
+    return 0;
+}
+
+## 11. Min Cost to Connect All Points (LeetCode)
+# Problem: Find minimum spanning tree cost in a complete graph
+# Description: Given points on a 2D plane, connect them all with minimum total Manhattan distance.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Edge {
+    int u, v, weight;
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> Parent, Rank;
+public:
+    DisjointSet(int n) {
+        Parent.resize(n);
+        Rank.resize(n, 0);
+        for (int i = 0; i < n; i++) {
+            Parent[i] = i;
+        }
+    }
+    
+    int Find(int x) {
+        if (Parent[x] != x) {
+            Parent[x] = Find(Parent[x]);
+        }
+        return Parent[x];
+    }
+    
+    bool UnionSets(int x, int y) {
+        int RootX = Find(x);
+        int RootY = Find(y);
+        
+        if (RootX == RootY) return false;
+        
+        if (Rank[RootX] < Rank[RootY]) {
+            Parent[RootX] = RootY;
+        } else if (Rank[RootX] > Rank[RootY]) {
+            Parent[RootY] = RootX;
+        } else {
+            Parent[RootY] = RootX;
+            Rank[RootX]++;
+        }
+        
+        return true;
+    }
+};
+
+int MinCostConnectPoints(vector<vector<int>>& points) {
+    int n = points.size();
+    vector<Edge> Edges;
+    
+    // Create all edges between points
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            int Weight = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1]);
+            Edges.push_back({i, j, Weight});
+        }
+    }
+    
+    // Sort edges by weight
+    sort(Edges.begin(), Edges.end());
+    
+    // Apply Kruskal's algorithm for MST
+    int TotalCost = 0;
+    int EdgesAdded = 0;
+    DisjointSet DS(n);
+    
+    for (Edge& Edge : Edges) {
+        if (DS.UnionSets(Edge.u, Edge.v)) {
+            TotalCost += Edge.weight;
+            EdgesAdded++;
+            
+            // MST has n-1 edges
+            if (EdgesAdded == n - 1) {
+                break;
+            }
+        }
+    }
+    
+    return TotalCost;
+}
+
+int main() {
+    vector<vector<int>> Points = {{0,0},{2,2},{3,10},{5,2},{7,0}};
+    cout << "Minimum cost to connect points: " << MinCostConnectPoints(Points) << endl;  // Output: 20
+    return 0;
+}
+
+## 12. Invert Binary Tree (LeetCode)
+# Problem: Invert a binary tree
+# Description: Given the root of a binary tree, invert the tree, and return its root.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+void Insert(Node *&Root, int Value) {
+    Node *NewNode = new Node(Value);
+    if (Root == NULL) {
+        Root = NewNode;
+        return;
+    }
+
+    queue<Node *> Q;
+    Q.push(Root);
+
+    while (!Q.empty()) {
+        Node *Temp = Q.front();
+        Q.pop();
+
+        if (Temp->Left == NULL) {
+            Temp->Left = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Left);
+        }
+
+        if (Temp->Right == NULL) {
+            Temp->Right = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Right);
+        }
+    }
+}
+
+Node* InvertTree(Node* Root) {
+    if (Root == NULL) {
+        return NULL;
+    }
+    
+    // Swap the left and right subtrees
+    Node* Temp = Root->Left;
+    Root->Left = Root->Right;
+    Root->Right = Temp;
+    
+    // Recursively invert the left and right subtrees
+    InvertTree(Root->Left);
+    InvertTree(Root->Right);
+    
+    return Root;
+}
+
+// Level order traversal to verify inversion
+void PrintLevelOrder(Node *Root) {
+    if (Root == NULL) {
+        cout << "Tree is empty." << endl;
+        return;
+    }
+
+    queue<Node *> Q;
+    Q.push(Root);
+
+    while (!Q.empty()) {
+        Node *Temp = Q.front();
+        Q.pop();
+
+        cout << Temp->Value << " ";
+
+        if (Temp->Left) {
+            Q.push(Temp->Left);
+        }
+        if (Temp->Right) {
+            Q.push(Temp->Right);
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    // Create a sample tree
+    Node *Root = NULL;
+    Insert(Root, 4);
+    Insert(Root, 2);
+    Insert(Root, 7);
+    Insert(Root, 1);
+    Insert(Root, 3);
+    Insert(Root, 6);
+    Insert(Root, 9);
+    
+    cout << "Original tree: ";
+    PrintLevelOrder(Root);
+    
+    Root = InvertTree(Root);
+    
+    cout << "Inverted tree: ";
+    PrintLevelOrder(Root);
+    
+    return 0;
+}
+
+## 13. Insert into a Binary Search Tree (LeetCode)
+# Problem: Insert a new value into a binary search tree
+# Description: Given the root node of a BST and a value, insert the value into the BST.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+Node* InsertIntoBST(Node* Root, int Value) {
+    // If tree is empty, create a new node and return it as root
+    if (Root == NULL) {
+        return new Node(Value);
+    }
+    
+    // Otherwise, traverse the tree to find the insertion point
+    if (Value < Root->Value) {
+        Root->Left = InsertIntoBST(Root->Left, Value);
+    } else {
+        Root->Right = InsertIntoBST(Root->Right, Value);
+    }
+    
+    return Root;
+}
+
+// Inorder traversal to verify BST property
+void InorderTraversal(Node* Root) {
+    if (!Root) return;
+    InorderTraversal(Root->Left);
+    cout << Root->Value << " ";
+    InorderTraversal(Root->Right);
+}
+
+int main() {
+    // Create a sample BST
+    Node* Root = NULL;
+    Root = InsertIntoBST(Root, 4);
+    Root = InsertIntoBST(Root, 2);
+    Root = InsertIntoBST(Root, 7);
+    Root = InsertIntoBST(Root, 1);
+    Root = InsertIntoBST(Root, 3);
+    
+    cout << "Original BST: ";
+    InorderTraversal(Root);
+    cout << endl;
+    
+    Root = InsertIntoBST(Root, 5);
+    
+    cout << "BST after insertion: ";
+    InorderTraversal(Root);
+    cout << endl;
+    
+    return 0;
+}
+
+## 14. Convert a Sorted Array to Binary Search Tree (LeetCode)
+# Problem: Create a height-balanced BST from a sorted array
+# Description: Given an integer array sorted in ascending order, convert it to a height-balanced BST.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+Node* BuildBST(vector<int>& Nums, int Left, int Right) {
+    if (Left > Right) {
+        return NULL;
+    }
+    
+    // Choose the middle element as the root
+    int Mid = Left + (Right - Left) / 2;
+    Node* Root = new Node(Nums[Mid]);
+    
+    // Recursively build left and right subtrees
+    Root->Left = BuildBST(Nums, Left, Mid - 1);
+    Root->Right = BuildBST(Nums, Mid + 1, Right);
+    
+    return Root;
+}
+
+Node* SortedArrayToBST(vector<int>& Nums) {
+    return BuildBST(Nums, 0, Nums.size() - 1);
+}
+
+// Inorder traversal to verify BST property
+void InorderTraversal(Node* Root) {
+    if (!Root) return;
+    InorderTraversal(Root->Left);
+    cout << Root->Value << " ";
+    InorderTraversal(Root->Right);
+}
+
+int main() {
+    vector<int> Nums = {-10, -3, 0, 5, 9};
+    
+    Node* Root = SortedArrayToBST(Nums);
+    
+    cout << "Inorder traversal of balanced BST: ";
+    InorderTraversal(Root);
+    cout << endl;
+    
+    return 0;
+}
+
+## 15. Search in a Binary Search Tree (LeetCode 700)
+# Problem: Search for a value in a BST
+# Description: Given the root node of a BST and a value, find the node in the BST that has the given value.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+Node* InsertIntoBST(Node* Root, int Value) {
+    if (Root == NULL) {
+        return new Node(Value);
+    }
+    
+    if (Value < Root->Value) {
+        Root->Left = InsertIntoBST(Root->Left, Value);
+    } else {
+        Root->Right = InsertIntoBST(Root->Right, Value);
+    }
+    
+    return Root;
+}
+
+Node* SearchBST(Node* Root, int Value) {
+    // Base cases: root is null or root's value matches the target
+    if (Root == NULL || Root->Value == Value) {
+        return Root;
+    }
+    
+    // If target value is less than root's value, search in left subtree
+    if (Value < Root->Value) {
+        return SearchBST(Root->Left, Value);
+    }
+    
+    // If target value is greater than root's value, search in right subtree
+    return SearchBST(Root->Right, Value);
+}
+
+int main() {
+    // Create a sample BST
+    Node* Root = NULL;
+    Root = InsertIntoBST(Root, 4);
+    Root = InsertIntoBST(Root, 2);
+    Root = InsertIntoBST(Root, 7);
+    Root = InsertIntoBST(Root, 1);
+    Root = InsertIntoBST(Root, 3);
+    
+    int ValueToSearch = 2;
+    Node* Result = SearchBST(Root, ValueToSearch);
+    
+    if (Result) {
+        cout << "Found value " << Result->Value << " with children ";
+        cout << (Result->Left ? to_string(Result->Left->Value) : "NULL") << " and ";
+        cout << (Result->Right ? to_string(Result->Right->Value) : "NULL") << endl;
+    } else {
+        cout << "Value not found in the BST" << endl;
+    }
+    
+    return 0;
+}
+
+## 16. N-ary Tree Preorder Traversal (LeetCode)
+# Problem: Implement preorder traversal of an N-ary tree
+# Description: Given the root of an N-ary tree, return the preorder traversal of its nodes' values.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    vector<Node*> Children;
+
+    Node() {}
+
+    Node(int Value) {
+        this->Value = Value;
+    }
+
+    Node(int Value, vector<Node*> Children) {
+        this->Value = Value;
+        this->Children = Children;
+    }
+};
+
+void PreorderHelper(Node* Root, vector<int>& Result) {
+    if (Root == NULL) {
+        return;
+    }
+    
+    // Process current node first
+    Result.push_back(Root->Value);
+    
+    // Then process all children
+    for (Node* Child : Root->Children) {
+        PreorderHelper(Child, Result);
+    }
+}
+
+vector<int> Preorder(Node* Root) {
+    vector<int> Result;
+    PreorderHelper(Root, Result);
+    return Result;
+}
+
+int main() {
+    // Create a sample N-ary tree
+    Node* Root = new Node(1);
+    Node* Child1 = new Node(3);
+    Node* Child2 = new Node(2);
+    Node* Child3 = new Node(4);
+    Node* Grandchild1 = new Node(5);
+    Node* Grandchild2 = new Node(6);
+    
+    Child1->Children = {Grandchild1, Grandchild2};
+    Root->Children = {Child1, Child2, Child3};
+    
+    vector<int> Result = Preorder(Root);
+    
+    cout << "Preorder traversal: ";
+    for (int Val : Result) {
+        cout << Val << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}
+
+## 17. Binary Search Tree (UVA 3705)
+# Problem: Implement a binary search tree with various operations
+# Description: Process queries to insert, delete, find, and print nodes in a BST.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+class BST {
+private:
+    Node* Root;
+    
+    Node* Insert(Node* Node, int Value) {
+        if (Node == NULL) {
+            return new class Node(Value);
+        }
+        
+        if (Value < Node->Value) {
+            Node->Left = Insert(Node->Left, Value);
+        } else if (Value > Node->Value) {
+            Node->Right = Insert(Node->Right, Value);
+        }
+        
+        return Node;
+    }
+    
+    bool Find(Node* Node, int Value) {
+        if (Node == NULL) {
+            return false;
+        }
+        
+        if (Value == Node->Value) {
+            return true;
+        }
+        
+        if (Value < Node->Value) {
+            return Find(Node->Left, Value);
+        } else {
+            return Find(Node->Right, Value);
+        }
+    }
+    
+    Node* FindMin(Node* Node) {
+        while (Node->Left != NULL) {
+            Node = Node->Left;
+        }
+        return Node;
+    }
+    
+    Node* Remove(Node* Node, int Value) {
+        if (Node == NULL) {
+            return NULL;
+        }
+        
+        if (Value < Node->Value) {
+            Node->Left = Remove(Node->Left, Value);
+        } else if (Value > Node->Value) {
+            Node->Right = Remove(Node->Right, Value);
+        } else {
+            // Node with only one child or no child
+            if (Node->Left == NULL) {
+                class Node* Temp = Node->Right;
+                delete Node;
+                return Temp;
+            } else if (Node->Right == NULL) {
+                class Node* Temp = Node->Left;
+                delete Node;
+                return Temp;
+            }
+            
+            // Node with two children
+            class Node* Temp = FindMin(Node->Right);
+            Node->Value = Temp->Value;
+            Node->Right = Remove(Node->Right, Temp->Value);
+        }
+        
+        return Node;
+    }
+    
+    void Preorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        cout << Node->Value << " ";
+        Preorder(Node->Left);
+        Preorder(Node->Right);
+    }
+    
+    void Inorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        Inorder(Node->Left);
+        cout << Node->Value << " ";
+        Inorder(Node->Right);
+    }
+    
+    void Postorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        Postorder(Node->Left);
+        Postorder(Node->Right);
+        cout << Node->Value << " ";
+    }
+    
+public:
+    BST() : Root(NULL) {}
+    
+    void Insert(int Value) {
+        Root = Insert(Root, Value);
+    }
+    
+    bool Find(int Value) {
+        return Find(Root, Value);
+    }
+    
+    void Remove(int Value) {
+        Root = Remove(Root, Value);
+    }
+    
+    void Preorder() {
+        Preorder(Root);
+        cout << endl;
+    }
+    
+    void Inorder() {
+        Inorder(Root);
+        cout << endl;
+    }
+    
+    void Postorder() {
+        Postorder(Root);
+        cout << endl;
+    }
+};
+
+int main() {
+    int t;
+    cin >> t;
+    
+    while (t--) {
+        BST Bst;
+        int q;
+        cin >> q;
+        
+        while (q--) {
+            string Op;
+            int Val;
+            cin >> Op;
+            
+            if (Op == "insert") {
+                cin >> Val;
+                Bst.Insert(Val);
+            } else if (Op == "delete") {
+                cin >> Val;
+                Bst.Remove(Val);
+            } else if (Op == "find") {
+                cin >> Val;
+                cout << (Bst.Find(Val) ? "found" : "not found") << endl;
+            } else if (Op == "preorder") {
+                Bst.Preorder();
+            } else if (Op == "inorder") {
+                Bst.Inorder();
+            } else if (Op == "postorder") {
+                Bst.Postorder();
+            }
+        }
+    }
+    
+    return 0;
+}
+
+## 18. Transportation System (UVA 2169)
+# Problem: Find the minimum cost to connect cities with roads or a state highway
+# Description: Given cities and distances between them, find the minimum cost to connect all cities.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct City {
+    int x, y;
+};
+
+struct Edge {
+    int from, to;
+    double weight;
+    
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> Parent, Rank;
+    
+public:
+    DisjointSet(int n) {
+        Parent.resize(n);
+        Rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            Parent[i] = i;
+        }
+    }
+    
+    int Find(int x) {
+        if (Parent[x] != x) {
+            Parent[x] = Find(Parent[x]);
+        }
+        return Parent[x];
+    }
+    
+    void UnionSets(int x, int y) {
+        int RootX = Find(x);
+        int RootY = Find(y);
+        
+        if (RootX == RootY) {
+            return;
+        }
+        
+        if (Rank[RootX] < Rank[RootY]) {
+            Parent[RootX] = RootY;
+        } else if (Rank[RootX] > Rank[RootY]) {
+            Parent[RootY] = RootX;
+        } else {
+            Parent[RootY] = RootX;
+            Rank[RootX]++;
+        }
+    }
+};
+
+double Dist(const City& a, const City& b) {
+    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+int main() {
+    int t;
+    cin >> t;
+    
+    for (int Scenario = 1; Scenario <= t; Scenario++) {
+        int n, r;
+        cin >> n >> r;
+        
+        vector<City> Cities(n);
+        for (int i = 0; i < n; i++) {
+            cin >> Cities[i].x >> Cities[i].y;
+        }
+        
+        // Create all edges between cities
+        vector<Edge> Edges;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                double d = Dist(Cities[i], Cities[j]);
+                Edges.push_back({i, j, d});
+            }
+        }
+        
+        // Sort edges by weight
+        sort(Edges.begin(), Edges.end());
+        
+        // Kruskal's algorithm for MST
+        DisjointSet DS(n);
+        double RoadCost = 0.0;
+        int StateComponents = n;
+        
+        for (const Edge& Edge : Edges) {
+            if (DS.Find(Edge.from) != DS.Find(Edge.to)) {
+                // If distance <= r, it's a road within a state
+                if (Edge.weight <= r) {
+                    DS.UnionSets(Edge.from, Edge.to);
+                    RoadCost += Edge.weight;
+                    StateComponents--;
+                } else {
+                    break;  // We'll connect remaining components using the state highway
+                }
+            }
+        }
+        
+        // Calculate number of states needed (each connected component needs one state)
+        int States = 0;
+        for (int i = 0; i < n; i++) {
+            if (DS.Find(i) == i) {
+                States++;
+            }
+        }
+        
+        double RailwayCost = 0.0;
+        if (States > 1) {
+            // Create a new graph with states as nodes
+            vector<int> StateRep(n);
+            for (int i = 0; i < n; i++) {
+                StateRep[DS.Find(i)] = i;
+            }
+            
+            // Find minimum spanning tree for states
+            vector<Edge> StateEdges;
+            for (int i = 0; i < n; i++) {
+                if (DS.Find(i) == i) {
+                    for (int j = i + 1; j < n; j++) {
+                        if (DS.Find(j) == j) {
+                            double d = Dist(Cities[StateRep[i]], Cities[StateRep[j]]);
+                            StateEdges.push_back({i, j, d});
+                        }
+                    }
+                }
+            }
+            
+            sort(StateEdges.begin(), StateEdges.end());
+            
+            DisjointSet StateDS(n);
+            for (const Edge& Edge : StateEdges) {
+                if (StateDS.Find(Edge.from) != StateDS.Find(Edge.to)) {
+                    StateDS.UnionSets(Edge.from, Edge.to);
+                    RailwayCost += Edge.weight;
+                }
+            }
+        }
+        
+        cout << "Case #" << Scenario << ": " << States << " " << fixed;
+        cout.precision(0);
+        cout << round(RoadCost) << " " << round(RailwayCost) << endl;
+    }
+    
+    return 0;
+}
+
+## 19. Connect the Campus (UVA 10397)
+# Problem: Find the minimum cost to connect all buildings on a campus
+# Description: Given buildings and some existing connections, find the minimum additional cost to connect all buildings.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Building {
+    int x, y;
+};
+
+struct Edge {
+    int from, to;
+    double weight;
+    
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> Parent, Rank;
+    
+public:
+    DisjointSet(int n) {
+        Parent.resize(n);
+        Rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            Parent[i] = i;
+        }
+    }
+    
+    int Find(int x) {
+        if (Parent[x] != x) {
+            Parent[x] = Find(Parent[x]);
+        }
+        return Parent[x];
+    }
+    
+    bool UnionSets(int x, int y) {
+        int RootX = Find(x);
+        int RootY = Find(y);
+        
+        if (RootX == RootY) {
+            return false;
+        }
+        
+        if (Rank[RootX] < Rank[RootY]) {
+            Parent[RootX] = RootY;
+        } else if (Rank[RootX] > Rank[RootY]) {
+            Parent[RootY] = RootX;
+        } else {
+            Parent[RootY] = RootX;
+            Rank[RootX]++;
+        }
+        
+        return true;
+    }
+};
+
+double Dist(const Building& a, const Building& b) {
+    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+int main() {
+    int n;
+    while (cin >> n) {
+        vector<Building> Buildings(n + 1);  // 1-indexed
+        
+        for (int i = 1; i <= n; i++) {
+            cin >> Buildings[i].x >> Buildings[i].y;
+        }
+        
+        int m;
+        cin >> m;
+        
+        DisjointSet DS(n + 1);
+        for (int i = 0; i < m; i++) {
+            int a, b;
+            cin >> a >> b;
+            DS.UnionSets(a, b);
+        }
+        
+        // Create all potential edges between buildings
+        vector<Edge> Edges;
+        for (int i = 1; i <= n; i++) {
+            for (int j = i + 1; j <= n; j++) {
+                double d = Dist(Buildings[i], Buildings[j]);
+                Edges.push_back({i, j, d});
+            }
+        }
+        
+        // Sort edges by weight
+        sort(Edges.begin(), Edges.end());
+        
+        // Kruskal's algorithm for MST, but only consider edges that don't already exist
+        double AdditionalCost = 0.0;
+        for (const Edge& Edge : Edges) {
+            if (DS.UnionSets(Edge.from, Edge.to)) {
+                AdditionalCost += Edge.weight;
+            }
+        }
+        
+        cout << fixed;
+        cout.precision(2);
+        cout << AdditionalCost << endl;
+    }
+    
+    return 0;
+}
+
+## 20. Binary Search Tree (UVA 3769)
+# Problem: Simulate operations on a Binary Search Tree
+# Description: Perform various operations like insertion, deletion, and search on a BST.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+class BST {
+private:
+    Node* Root;
+    
+    Node* Insert(Node* Node, int Value) {
+        if (Node == NULL) {
+            return new class Node(Value);
+        }
+        
+        if (Value < Node->Value) {
+            Node->Left = Insert(Node->Left, Value);
+        } else if (Value > Node->Value) {
+            Node->Right = Insert(Node->Right, Value);
+        }
+        
+        return Node;
+    }
+    
+    bool Search(Node* Node, int Value) {
+        if (Node == NULL) {
+            return false;
+        }
+        
+        if (Value == Node->Value) {
+            return true;
+        }
+        
+        if (Value < Node->Value) {
+            return Search(Node->Left, Value);
+        } else {
+            return Search(Node->Right, Value);
+        }
+    }
+    
+    Node* FindMin(Node* Node) {
+        while (Node->Left != NULL) {
+            Node = Node->Left;
+        }
+        return Node;
+    }
+    
+    Node* Remove(Node* Node, int Value) {
+        if (Node == NULL) {
+            return NULL;
+        }
+        
+        if (Value < Node->Value) {
+            Node->Left = Remove(Node->Left, Value);
+        } else if (Value > Node->Value) {
+            Node->Right = Remove(Node->Right, Value);
+        } else {
+            // Node with only one child or no child
+            if (Node->Left == NULL) {
+                class Node* Temp = Node->Right;
+                delete Node;
+                return Temp;
+            } else if (Node->Right == NULL) {
+                class Node* Temp = Node->Left;
+                delete Node;
+                return Temp;
+            }
+            
+            // Node with two children
+            class Node* Temp = FindMin(Node->Right);
+            Node->Value = Temp->Value;
+            Node->Right = Remove(Node->Right, Temp->Value);
+        }
+        
+        return Node;
+    }
+    
+    void Inorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        Inorder(Node->Left);
+        cout << Node->Value << " ";
+        Inorder(Node->Right);
+    }
+    
+    void Preorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        cout << Node->Value << " ";
+        Preorder(Node->Left);
+        Preorder(Node->Right);
+    }
+    
+    void Postorder(Node* Node) {
+        if (Node == NULL) {
+            return;
+        }
+        
+        Postorder(Node->Left);
+        Postorder(Node->Right);
+        cout << Node->Value << " ";
+    }
+    
+public:
+    BST() : Root(NULL) {}
+    
+    void Insert(int Value) {
+        Root = Insert(Root, Value);
+    }
+    
+    bool Search(int Value) {
+        return Search(Root, Value);
+    }
+    
+    void Remove(int Value) {
+        Root = Remove(Root, Value);
+    }
+    
+    void Inorder() {
+        Inorder(Root);
+        cout << endl;
+    }
+    
+    void Preorder() {
+        Preorder(Root);
+        cout << endl;
+    }
+    
+    void Postorder() {
+        Postorder(Root);
+        cout << endl;
+    }
+};
+
+int main() {
+    int n;
+    while (cin >> n && n != 0) {
+        BST Bst;
+        
+        for (int i = 0; i < n; i++) {
+            string Op;
+            cin >> Op;
+            
+            if (Op == "INSERT") {
+                int Val;
+                cin >> Val;
+                Bst.Insert(Val);
+            } else if (Op == "REMOVE") {
+                int Val;
+                cin >> Val;
+                Bst.Remove(Val);
+            } else if (Op == "SEARCH") {
+                int Val;
+                cin >> Val;
+                if (Bst.Search(Val)) {
+                    cout << "Yes" << endl;
+                } else {
+                    cout << "No" << endl;
+                }
+            } else if (Op == "INORDER") {
+                Bst.Inorder();
+            } else if (Op == "PREORDER") {
+                Bst.Preorder();
+            } else if (Op == "POSTORDER") {
+                Bst.Postorder();
+            }
+        }
+    }
+    
+    return 0;
+}
+
+## 21. Reconnecting Computer Sites (UVA 849)
+# Problem: Finding the minimum cost to reconnect computer sites after a disaster
+# Description: Given old connections and possible new connections, find the minimum cost to reconnect all sites.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Edge {
+    int from, to, cost;
+    
+    bool operator<(const Edge& other) const {
+        return cost < other.cost;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> Parent, Rank;
+    
+public:
+    DisjointSet(int n) {
+        Parent.resize(n);
+        Rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            Parent[i] = i;
+        }
+    }
+    
+    int Find(int x) {
+        if (Parent[x] != x) {
+            Parent[x] = Find(Parent[x]);
+        }
+        return Parent[x];
+    }
+    
+    bool UnionSets(int x, int y) {
+        int RootX = Find(x);
+        int RootY = Find(y);
+        
+        if (RootX == RootY) {
+            return false;
+        }
+        
+        if (Rank[RootX] < Rank[RootY]) {
+            Parent[RootX] = RootY;
+        } else if (Rank[RootX] > Rank[RootY]) {
+            Parent[RootY] = RootX;
+        } else {
+            Parent[RootY] = RootX;
+            Rank[RootX]++;
+        }
+        
+        return true;
+    }
+};
+
+int main() {
+    int n;
+    bool first = true;
+    
+    while (cin >> n) {
+        if (!first) {
+            cout << endl;
+        }
+        first = false;
+        
+        int OldCost = 0;
+        vector<Edge> OldEdges(n - 1);
+        
+        for (int i = 0; i < n - 1; i++) {
+            cin >> OldEdges[i].from >> OldEdges[i].to >> OldEdges[i].cost;
+            OldCost += OldEdges[i].cost;
+        }
+        
+        int k;
+        cin >> k;
+        
+        vector<Edge> NewPossibleEdges(k);
+        for (int i = 0; i < k; i++) {
+            cin >> NewPossibleEdges[i].from >> NewPossibleEdges[i].to >> NewPossibleEdges[i].cost;
+        }
+        
+        // Combine old and new edges
+        vector<Edge> AllEdges;
+        AllEdges.insert(AllEdges.end(), OldEdges.begin(), OldEdges.end());
+        AllEdges.insert(AllEdges.end(), NewPossibleEdges.begin(), NewPossibleEdges.end());
+        
+        // Sort all edges
+        sort(AllEdges.begin(), AllEdges.end());
+        
+        // Kruskal's algorithm for MST
+        DisjointSet DS(n + 1);  // 1-indexed
+        int NewCost = 0;
+        int EdgesAdded = 0;
+        
+        for (const Edge& Edge : AllEdges) {
+            if (DS.UnionSets(Edge.from, Edge.to)) {
+                NewCost += Edge.cost;
+                EdgesAdded++;
+                
+                if (EdgesAdded == n - 1) {
+                    break;
+                }
+            }
+        }
+        
+        cout << OldCost << endl << NewCost << endl;
+        
+        int m;
+        cin >> m;
+        if (m == -1) {
+            break;
+        }
+    }
+    
+    return 0;
+}
+
+## 22. Slim Span (UVA 1395)
+# Problem: Finding a spanning tree with minimum difference between maximum and minimum edge weights
+# Description: For a given graph, find a spanning tree such that the difference between maximum and minimum edge weights is minimized.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Edge {
+    int from, to, weight;
+    
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+class DisjointSet {
+private:
+    vector<int> Parent, Rank;
+    
+public:
+    DisjointSet(int n) {
+        Parent.resize(n);
+        Rank.resize(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            Parent[i] = i;
+        }
+    }
+    
+    int Find(int x) {
+        if (Parent[x] != x) {
+            Parent[x] = Find(Parent[x]);
+        }
+        return Parent[x];
+    }
+    
+    bool UnionSets(int x, int y) {
+        int RootX = Find(x);
+        int RootY = Find(y);
+        
+        if (RootX == RootY) {
+            return false;
+        }
+        
+        if (Rank[RootX] < Rank[RootY]) {
+            Parent[RootX] = RootY;
+        } else if (Rank[RootX] > Rank[RootY]) {
+            Parent[RootY] = RootX;
+        } else {
+            Parent[RootY] = RootX;
+            Rank[RootX]++;
+        }
+        
+        return true;
+    }
+};
+
+int main() {
+    int n, m;
+    
+    while (cin >> n >> m && (n || m)) {
+        vector<Edge> Edges(m);
+        
+        for (int i = 0; i < m; i++) {
+            cin >> Edges[i].from >> Edges[i].to >> Edges[i].weight;
+        }
+        
+        sort(Edges.begin(), Edges.end());
+        
+        int MinSpan = INT_MAX;
+        
+        // Try each edge as the starting edge for a MST
+        for (int i = 0; i <= m - n + 1; i++) {
+            DisjointSet DS(n + 1);  // 1-indexed
+            int EdgesAdded = 0;
+            int MinWeight = INT_MAX, MaxWeight = 0;
+            
+            for (int j = i; j < m && EdgesAdded < n - 1; j++) {
+                if (DS.UnionSets(Edges[j].from, Edges[j].to)) {
+                    EdgesAdded++;
+                    MinWeight = min(MinWeight, Edges[j].weight);
+                    MaxWeight = max(MaxWeight, Edges[j].weight);
+                }
+            }
+            
+            // Check if a spanning tree was formed
+            if (EdgesAdded == n - 1) {
+                MinSpan = min(MinSpan, MaxWeight - MinWeight);
+            }
+        }
+        
+        if (MinSpan == INT_MAX) {
+            cout << -1 << endl;
+        } else {
+            cout << MinSpan << endl;
+        }
+    }
+    
+    return 0;
+}
+
+## 23. Identify the Tree (UVA 556)
+# Problem: Identify the structure of a tree based on its properties
+# Description: Given the inorder and preorder traversal of a tree, determine the tree's structure.
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    char Value;
+    Node *Left;
+    Node *Right;
+    Node(char Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+Node* BuildTreeHelper(string& Preorder, int PreStart, int PreEnd,
+                     string& Inorder, int InStart, int InEnd,
+                     unordered_map<char, int>& InorderMap) {
+    if (PreStart > PreEnd || InStart > InEnd) {
+        return NULL;
+    }
+    
+    char RootVal = Preorder[PreStart];
+    Node* Root = new Node(RootVal);
+    
+    int InRoot = InorderMap[RootVal];
+    int LeftSize = InRoot - InStart;
+    
+    Root->Left = BuildTreeHelper(Preorder, PreStart + 1, PreStart + LeftSize,
+                               Inorder, InStart, InRoot - 1,
+                               InorderMap);
+    
+    Root->Right = BuildTreeHelper(Preorder, PreStart + LeftSize + 1, PreEnd,
+                                Inorder, InRoot + 1, InEnd,
+                                InorderMap);
+    
+    return Root;
+}
+
+Node* BuildTree(string& Preorder, string& Inorder) {
+    if (Preorder.empty() || Inorder.empty()) {
+        return NULL;
+    }
+    
+    // Create a map for O(1) lookups in inorder traversal
+    unordered_map<char, int> InorderMap;
+    for (int i = 0; i < Inorder.size(); i++) {
+        InorderMap[Inorder[i]] = i;
+    }
+    
+    return BuildTreeHelper(Preorder, 0, Preorder.size() - 1,
+                          Inorder, 0, Inorder.size() - 1,
+                          InorderMap);
+}
+
+void Postorder(Node* Root, string& Result) {
+    if (Root == NULL) {
+        return;
+    }
+    
+    Postorder(Root->Left, Result);
+    Postorder(Root->Right, Result);
+    Result += Root->Value;
+}
+
+int main() {
+    string Preorder, Inorder;
+    
+    while (cin >> Preorder >> Inorder) {
+        Node* Root = BuildTree(Preorder, Inorder);
+        
+        string Result = "";
+        Postorder(Root, Result);
+        
+        cout << Result << endl;
+    }
+    
+    return 0;
+}
+
+// Basic complete binary tree implementation with level-order insertion
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+public:
+    int Value;
+    Node *Left;
+    Node *Right;
+    Node(int Value) {
+        this->Value = Value;
+        this->Left = NULL;
+        this->Right = NULL;
+    }
+};
+
+void Insert(Node *&Root, int Value) {
+    Node *NewNode = new Node(Value);
+    if (Root == NULL) {
+        Root = NewNode;
+        return;
+    }
+
+    queue<Node *> Q;
+    Q.push(Root);
+
+    while (!Q.empty()) {
+        Node *Temp = Q.front();
+        Q.pop();
+
+        if (Temp->Left == NULL) {
+            Temp->Left = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Left);
+        }
+
+        if (Temp->Right == NULL) {
+            Temp->Right = NewNode;
+            return;
+        } else {
+            Q.push(Temp->Right);
+        }
+    }
+}
+
+void PrintLevelOrder(Node *Root) {
+    if (Root == NULL) {
+        cout << "Tree is empty." << endl;
+        return;
+    }
+
+    queue<Node *> Q;
+    Q.push(Root);
+
+    while (!Q.empty()) {
+        Node *Temp = Q.front();
+        Q.pop();
+
+        cout << Temp->Value << " ";
+
+        if (Temp->Left) {
+            Q.push(Temp->Left);
+        }
+        if (Temp->Right) {
+            Q.push(Temp->Right);
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    Node *Root = NULL;
+
+    Insert(Root, 1);
+    Insert(Root, 2);
+    Insert(Root, 3);
+    Insert(Root, 4);
+    Insert(Root, 5);
+    Insert(Root, 6);
+    Insert(Root, 7);
+
+    cout << "Level-order traversal of the complete binary Tree: ";
+    PrintLevelOrder(Root);
+
+    return 0;
+}
